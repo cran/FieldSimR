@@ -1,0 +1,14 @@
+da8795041493c2d689e18515f61a2ca2 *DESCRIPTION
+bc40965b0e9c2a3b0175a90ff8bcbc36 *NAMESPACE
+d0b12e52aa165e6a76ee307fc07cb31c *R/compound_symmetry_gxe.R
+d009a73ae94c31c5c5ce9ce594c8b8e1 *R/field_trial_error.R
+fc2c4b501a0242452add9df3ffae1d7c *R/plot_effects.R
+e5e13ae99109b70f2523264589630211 *R/random_corr_mat.R
+e752a910b8df170261f73b6ba297f8fe *R/unstructured_gxe.R
+97017e83789cf3eaba07aecbc3295adc *man/compsym_asr_input.Rd
+3aa3a87b204117ab92556bad34dd84e1 *man/compsym_asr_output.Rd
+153aa1022ab179ccb91f88b58591d273 *man/field_trial_error.Rd
+130b4f2528cb9fe36c6cebeb792f9b7b *man/plot_effects.Rd
+b43a7a04774ca7cb06acab33092623ab *man/rand_cor_mat.Rd
+71f9ca41611fc7beb3dfb347875da2f8 *man/unstr_asr_input.Rd
+2a833f5ae6d75b761c734c7ff06d54d8 *man/unstr_asr_output.Rd
