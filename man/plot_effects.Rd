@@ -2,79 +2,37 @@
 % Please edit documentation in R/plot_effects.R
 \name{plot_effects}
 \alias{plot_effects}
-\title{Graphics for plot-level effects}
+\title{Graphics for plot effects}
 \usage{
-plot_effects(df, env, effect, blocks = TRUE)
+plot_effects(df, effect, blocks = TRUE)
 }
 \arguments{
-\item{df}{A data frame containing the columns "env", "row", "col", and the effect to be plotted.
-If \code{df} contains a column named "block", then block borders will distinguish the blocks
-if \code{blocks = TRUE}. If \code{df} is a list, only the first entry will be used unless
-otherwise specified.}
+\item{df}{A data frame with columns 'col', 'row', and the effect to be plotted. When \code{df}
+also contains a 'block' column, the field array is split into blocks if \code{blocks = TRUE}.}
 
-\item{env}{The name of the environment to be plotted.}
+\item{effect}{The effect to be plotted.}
 
-\item{effect}{The name of the effect to be plotted.}
-
-\item{blocks}{When TRUE (default), blocks are distinguished with block borders.}
+\item{blocks}{When \code{TRUE} (default), the field array is split into blocks.}
 }
 \value{
-Graphic of the field array, where the colour gradient ranges from red (low value) to
-  green (high value) of the effect
+A graphical field array, in which the colour gradient ranges from red (low value)
+to green (high value).
 }
 \description{
-Graphically displays plot-level effects (e.g., phenotypic values, genetic values, errors) onto
-a field array, where the colour gradient ranges from red (low value) to green (high value). \cr
-This function requires a data frame generated with \link[FieldSimR]{field_trial_error} as an
-input, or any data frame with columns named "env", "col", "row", and the effect to be displayed.
-If the data frame contains a column named "block", then block borders will distinguish the
-blocks if \code{blocks = TRUE}.
+Graphically displays plot effects (e.g., phenotypes, genetic values, plot errors) onto a
+field array, in which the colour gradient ranges from red (low value) to green (high value).
+The function requires a data frame generated with field_trial_error as an input, or any data
+frame with columns 'col', 'row', and the effect to be displayed. When the data frame contains a
+'block' column, the field array is split into blocks if \code{blocks = TRUE}.
 }
 \examples{
-# Simulation of plot-level errors for two traits in three environments using a bivariate
-# interpolation model for spatial variation.
+# Plot the simulated plot errors for trait 2 in environment 2 provided in the example data
+# frame 'df_error_bivar'.
 
-n_envs <- 3 # Number of simulated environments.
-n_traits <- 2 # Number of simulated traits.
+error_df <- df_error_bivar[df_error_bivar$env == 2, ]
 
-# Field layout
-n_cols <- 10 # Total number of columns in each environment.
-n_rows <- c(20, 30, 20) # Total number of rows in each environment.
-plot_length <- 5 # Plot length set to 5 meters in each environment.
-plot_width <- 2 # Plot width set to 2 meters in each environment.
-n_reps <- c(2, 3, 2) # Number of complete replicates (blocks) per environment.
-
-# Error variances for traits 1 and 2.
-var_R <- c(0.4, 15)
-
-# Spatial error correlations between traits 1 and 2.
-S_cor_R <- matrix(c(
-  1.0, 0.2,
-  0.2, 1.0
-),
-ncol = 2
-)
-
-error_df <- field_trial_error(
-  n_envs = n_envs,
-  n_traits = n_traits,
-  n_cols = n_cols,
-  n_rows = n_rows,
-  plot_length = plot_length,
-  plot_width = plot_width,
-  n_reps = n_reps,
-  rep_dir = "row",
-  var_R = var_R,
-  S_cor_R = S_cor_R,
-  spatial_model = "bivariate",
-  prop_spatial = 0.6,
-  complexity = 14,
-  return_effects = TRUE
-)
-
-# Display the simulated error for trait 2 in environment 2.
-plot_effects(error_df,
-  env = 2,
+plot_effects(
+  df = error_df,
   effect = "e.Trait.2"
 )
 }
