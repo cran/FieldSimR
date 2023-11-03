@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -12,7 +12,7 @@ library(ggplot2)
 ## -----------------------------------------------------------------------------
 n_traits <- 2 # Number of traits.
 n_envs <- 3 # Number of environments (locations).
-n_reps <- c(3, 3, 2) # Number of full replicates within environments 1, 2 and 3.
+n_reps <- c(2, 3, 2) # Number of replicates tested within environments 1, 2 and 3.
 
 
 n_ind <- 100 # Number of founder genotypes in the population.
@@ -71,7 +71,8 @@ founders <- runMacs( # Simulation of founder genotypes using AlphaSimR's "MAIZE"
   nInd = n_ind, # to mimic the species' evolutionary history.
   nChr = n_chr,
   segSites = n_seg_sites,
-  species = "MAIZE"
+  species = "MAIZE",
+  nThreads = 2
 )
 
 SP <- SimParam$new(founders)

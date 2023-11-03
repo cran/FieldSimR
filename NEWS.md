@@ -33,3 +33,24 @@
 * Set the `complexity` argument of `field_trial_error` by default to the maximum number of columns and rows in each environment.
 
 * Updated Description in `DESCRIPTION`.
+
+
+# FieldSimR 1.2.1
+
+* Argument `ext_ord` replaced arguments `ext_col_cor` and `ext_row_cor` in function `field_trial_error`.
+
+* Factorised argument `env`, `rep` and `id` in functions `field_trial_error`, `make_phenotypes`, `unstr_asr_output`, `compsym_asr_output`.
+
+* Randomisation fixed in function `make_phenotypes`.
+
+* Changed default parameters for `col_cor` and `row_cor`, `prop_spatial`, and `complexity` in function `field_trial_error`.
+
+* Argument `plot_labels` added to function `plot_effects`.
+
+* Added function `qq_plot to create` quantile-quantile (Q-Q) plots.
+
+* Added function `sample_variogram` to create sample variograms.
+
+* Added function `theoretical_variogram` to create theoretical variograms.
+
+

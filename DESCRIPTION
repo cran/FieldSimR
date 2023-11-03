@@ -1,8 +1,8 @@
 Package: FieldSimR
 Title: Simulation of Plot Errors and Phenotypes in Plant Breeding Field
         Trials
-Version: 1.1.0
-Date: 2023-04-10
+Version: 1.2.0
+Date: 2023-11-02
 Authors@R: c(person("Christian", "Werner", email = "werner.christian@proton.me", 
 	  role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9400-5061")),
     person("Daniel", "Tolhurst", role = "aut",
@@ -34,7 +34,7 @@ RoxygenNote: 7.2.3
 Depends: R (>= 2.10)
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2023-04-12 15:48:28 UTC; CWERNER
+Packaged: 2023-11-03 17:05:39 UTC; CWERNER
 Author: Christian Werner [aut, cre] (<https://orcid.org/0000-0001-9400-5061>),
   Daniel Tolhurst [aut] (<https://orcid.org/0000-0002-4787-080X>),
   Chris Gaynor [ctb] (<https://orcid.org/0000-0003-0558-6656>),
@@ -42,4 +42,4 @@ Author: Christian Werner [aut, cre] (<https://orcid.org/0000-0001-9400-5061>),
     (<https://orcid.org/0000-0002-7194-3837>),
   Lorena Batista [ctb] (<https://orcid.org/0000-0001-8472-8776>)
 Repository: CRAN
-Date/Publication: 2023-04-12 16:10:02 UTC
+Date/Publication: 2023-11-03 17:30:02 UTC

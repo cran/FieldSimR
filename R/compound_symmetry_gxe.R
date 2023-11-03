@@ -74,12 +74,12 @@
 #'
 #' @examples
 #' # Simulate genetic values in 'AlphaSimR' for two additive + dominance traits across
-#' # three environments based on a compound symmetry model for GxE interaction.
+#' # two environments based on a compound symmetry model for GxE interaction.
 #'
 #' # 1. Define the genetic architecture of the simulated traits.
 #' # Mean genetic values and mean dominance degrees.
-#' mean <- c(4.9, 5.4, 5.1, 235.2, 228.5, 239.1) # Trait 1 x 3 environments, trait 2 x 3 environments.
-#' mean_DD <- c(0.4, 0.4, 0.4, 0.1, 0.1, 0.1) # Trait 1 and 2, same values in the three environments.
+#' mean <- c(4.9, 5.4, 235.2, 228.5) # Trait 1 x 2 environments, trait 2 x 2 environments.
+#' mean_DD <- c(0.4, 0.4, 0.1, 0.1) # Trait 1 and 2, same values in the two environments.
 #'
 #' # Additive genetic variances and dominance degree variances.
 #' var <- c(0.08, 13) # Different values set for traits 1 and 2.
@@ -100,7 +100,7 @@
 #' cor_DD <- diag(2) # Dominance correlation matrix - assume independence.
 #'
 #' input_asr <- compsym_asr_input(
-#'   n_envs = 3,
+#'   n_envs = 2,
 #'   n_traits = 2,
 #'   mean = mean,
 #'   var = var,
@@ -332,8 +332,8 @@ compsym_asr_input <- function(n_envs = 3,
 #' @param n_envs Number of simulated environments (same number used in
 #'   \link[FieldSimR]{compsym_asr_input}).
 #' @param n_traits Number of simulated traits (same number used in \link[FieldSimR]{compsym_asr_input}).
-#' @param n_reps A vector defining the number of complete replicates (blocks) in each environment.
-#'   If only one value is specified, all environments will be assigned the same number.
+#' @param n_reps A vector defining the number of replicates in each environment. If only one value
+#'   is specified, all environments will be assigned the same number.
 #' @param effects When \code{TRUE}, a list is returned with additional entries containing the total
 #'   (additive + dominance + epistatic) main effects and GxE interaction effects for each
 #'   environment-within-trait combination. By default, \code{effects = FALSE}.
@@ -345,12 +345,12 @@ compsym_asr_input <- function(n_envs = 3,
 #'
 #' @examples
 #' # Simulate genetic values in 'AlphaSimR' for two additive + dominance traits across
-#' # three environments based on a compound symmetry model for GxE interaction.
+#' # two environments based on a compound symmetry model for GxE interaction.
 #'
 #' # 1. Define the genetic architecture of the simulated traits.
 #' # Mean genetic values and mean dominance degrees.
-#' mean <- c(4.9, 5.4, 5.1, 235.2, 228.5, 239.1) # Trait 1 x 3 environments, trait 2 x 3 environments.
-#' mean_DD <- c(0.4, 0.4, 0.4, 0.1, 0.1, 0.1) # Trait 1 and 2, same values in the three environments.
+#' mean <- c(4.9, 5.4, 235.2, 228.5) # Trait 1 x 2 environments, trait 2 x 2 environments.
+#' mean_DD <- c(0.4, 0.4, 0.1, 0.1) # Trait 1 and 2, same values in the two environments.
 #'
 #' # Additive genetic variances and dominance degree variances.
 #' var <- c(0.08, 13) # Different values set for traits 1 and 2.
@@ -371,7 +371,7 @@ compsym_asr_input <- function(n_envs = 3,
 #' cor_DD <- diag(2) # Dominance correlation matrix - assume independence.
 #'
 #' input_asr <- compsym_asr_input(
-#'   n_envs = 3,
+#'   n_envs = 2,
 #'   n_traits = 2,
 #'   mean = mean,
 #'   var = var,
@@ -389,15 +389,19 @@ compsym_asr_input <- function(n_envs = 3,
 #'
 #' library("AlphaSimR")
 #' FOUNDERPOP <- quickHaplo(
-#'   nInd = 100,
-#'   nChr = 6,
-#'   segSites = 100
+#'   nInd = 10,
+#'   nChr = 1,
+#'   segSites = 20
 #' )
 #'
 #' SP <- SimParam$new(FOUNDERPOP)
 #'
+#' \dontshow{
+#' SP$nThreads <- 1L
+#' }
+#'
 #' SP$addTraitAD(
-#'   nQtlPerChr = 100,
+#'   nQtlPerChr = 20,
 #'   mean = input_asr$mean,
 #'   var = input_asr$var,
 #'   meanDD = input_asr$mean_DD,
@@ -414,13 +418,13 @@ compsym_asr_input <- function(n_envs = 3,
 #'
 #'
 #' # 3. Create a data frame containing the simulated genetic values for the two traits across the
-#' # three environments.
+#' # two environments.
 #'
-#' n_reps <- c(3, 3, 2) # Vector containing the number of complete replicates in each environment.
+#' n_reps <- c(2, 2) # Vector containing the number of complete replicates in each environment.
 #'
 #' gv_df <- compsym_asr_output(
 #'   pop = pop,
-#'   n_envs = 3,
+#'   n_envs = 2,
 #'   n_traits = 2,
 #'   n_reps = n_reps,
 #'   effects = TRUE
@@ -441,8 +445,9 @@ compsym_asr_output <- function(pop,
 
   if (n_traits < 1 | n_traits %% 1 != 0) stop("'n_traits' must be an integer > 0")
 
-  envs <- rep(1:n_envs, times = length(pop@id) * n_reps)
-  reps <- unlist(lapply(n_reps, function(x) rep(1:x, each = length(pop@id))))
+  envs <- factor(rep(1:n_envs, times = length(pop@id) * n_reps))
+  reps <- factor(unlist(lapply(n_reps, function(x) rep(1:x, each = length(pop@id)))))
+  ids <- factor(as.numeric(as.character(pop@id)))
 
   g_main <- as.list(as.data.frame(pop@gv[, seq(1, (n_traits + n_traits * n_envs), (n_envs + 1))]))
   gxe_env <- pop@gv[, -seq(1, (n_traits + n_traits * n_envs), n_envs + 1)]
@@ -456,9 +461,10 @@ compsym_asr_output <- function(pop,
   compsym_asr <- data.frame(
     env = envs,
     rep = reps,
-    id = pop@id,
+    id = ids,
     gv = gv
   )
+  compsym_asr <- compsym_asr[order(compsym_asr$env, compsym_asr$rep, compsym_asr$id), ]
 
   if (effects) {
     g_main <- mapply(cbind, list(data.frame(id = pop@id)), g_main = g_main, SIMPLIFY = F)
@@ -468,6 +474,10 @@ compsym_asr_output <- function(pop,
     gxe_env <- lapply(index_eff, function(x) gxe_env[, x])
 
     eff_comps <- mapply(cbind, g_main, gxe_env = gxe_env, SIMPLIFY = F)
+    eff_comps <- lapply(eff_comps, function(x) {
+      x[[1]] <- factor(as.numeric(as.character(x[[1]])))
+      x <- x[order(x[[1]]), ]
+    })
 
     listNames <- c("Trial.df", paste0("Trait.", 1:n_traits))
     compsym_asr <- list(compsym_asr)
