@@ -76,35 +76,3 @@ error_df <- field_trial_error(
 error_env2 <- error_df$plot_df[error_df$plot_df$env == 2, ]
 e_comp_env2 <- error_df$Trait.1[error_df$Trait.1$env == 2, ]
 
-## ----fig.height = 4, fig.width = 9, fig.align = "center"----------------------
-plot_effects(error_env2, effect = "e.Trait.1")
-
-## ----fig.height = 4, fig.width = 9, fig.align = "center"----------------------
-plot_effects(e_comp_env2, effect = "e_spat")
-
-## ----fig.height = 4, fig.width = 9, fig.align = "center"----------------------
-plot_effects(e_comp_env2, effect = "e_rand")
-
-## ----fig.height = 4, fig.width = 9, fig.align = "center"----------------------
-plot_effects(e_comp_env2, effect = "e_ext_row")
-
-## -----------------------------------------------------------------------------
-gv_df <- df_gv_unstr
-
-pheno_df <- make_phenotypes(
-  gv_df,
-  error_df$plot_df,
-  randomise = TRUE
-)
-
-pheno_env2 <- pheno_df[pheno_df$env == 2, ] # Extract phenotypes in environment 2.
-
-## ----fig.height = 4, fig.width = 9, fig.align = "center"----------------------
-plot_effects(pheno_env2, effect = "phe.Trait.1")
-
-## ----echo=TRUE, fig.height = 4, fig.width = 9, fig.align = "center"-----------
-ggplot(pheno_env2, aes(x = phe.Trait.1, fill = factor(block))) +
-  geom_histogram(color = "#e9ecef", alpha = 0.8, position = "identity", bins = 50) +
-  scale_fill_manual(values = c("violetred3", "goldenrod3", "skyblue2")) +
-  labs(x = "Genetic values for grain yield (t/ha)", y = "Count", fill = "Block")
-

@@ -4,41 +4,45 @@
 \alias{sample_variogram}
 \title{Sample variogram}
 \usage{
-sample_variogram(df, effect, min_np = 30)
+sample_variogram(df, effect, min.np = 30)
 }
 \arguments{
-\item{df}{A data frame containing the columns 'col', 'row', and the effect to be plotted.}
+\item{df}{A data frame with the columns 'col', 'row', and the effects to be plotted.}
 
-\item{effect}{The name of the effect to be plotted.}
+\item{effect}{The name of the effects to be plotted.}
 
-\item{min_np}{Only semi variances based on at least \code{min_np} pairs of plots will be
-displayed. By default, \code{min_np = 30}.}
+\item{min.np}{Minimum number of pairs for which semivariances are displayed (default is 30).}
 }
 \value{
-Graphic of the sample variogram, where the x- and y-axes display the row and
-  column displacements and the z-axis displays the semi-variance (variogram ordinates).
+A sample variogram with x- and y-axes displaying the row and
+  column displacements, and the z-axis displaying the average semivariances (variogram ordinates)
+  for the effects.
 }
 \description{
-Creates a sample variogram. The x- and y-axes display the row and column displacements,
-respectively. The z-axis displays the semi-variance (variogram ordinates).
+Creates a sample variogram for a set of effects (e.g., plot errors).
 }
 \examples{
-# Sample variogram of the simulated plot errors for trait 2 in environment 2 provided in the
-# example data frame 'df_error_bivar'.
+# Sample variogram of plot errors simulated using a separable first order
+# autoregressive (AR1) process.
 
-error_df <- df_error_bivar[df_error_bivar$env == 2, ]
+error_df <- field_trial_error(
+  ntraits = 1,
+  nenvs = 1,
+  spatial.model = "AR1"
+)
 
-vario <- sample_variogram(
+variogram <- sample_variogram(
   df = error_df,
-  effect = "e.Trait.2",
+  effect = "e.Trait1"
 )
 
 # Sample variogram
-vario
 
-# Extraction of a data frame containing the column and row displacements as well as the
-# semi-variances (sample variogram ordinates).
+variogram
 
-sample_df <- vario$data
+# Extract the data frame with the column and row displacements, and the
+# average semivariances.
+
+variogram_df <- variogram$data
 
 }
