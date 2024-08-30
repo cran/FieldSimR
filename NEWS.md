@@ -77,5 +77,25 @@
 
 * Added `plot_matrix` function for graphically displaying a symmetric matrix, e.g., correlation or covariance matrix, in a similar manner to the `plot_effects` function. This function allows the matrix to be ordered based on a dendrogram, and split into user-defined groups.
 
+# FieldSimR 1.4.0
+
+* Added functionality to the `make_phenotypes` function to handle incomplete experimental designs through the new `design.df` argument, which accepts a data frame with individual x environment frequencies. 
+
+* Added new function `struc_cor_mat` for simulating structured correlation matrices with reduced rank. This function also handles user-defined base functions.
+
+* Added new functions `rand_diag_mat` and `skew_diag_mat` for simulating diagonal variance matrices, with diagonal elements simulated randomly or with a skewed (gamma or inverse gamma) distribution, respectively.
+
+* Added new function `sample_met` for sampling environments from a larger population to mimic the sampling which occurs during multi-environment trialling.
+
+* Swapped order of `rep` and `id` arguments in `compsym_asr_output` and `unstr_asr_output` functions
+
+* Swapped order of `rep` and `id` arguments in `gv_df_unstr` example data frame.
+
+* Updated colour scheme in `plot_matrix`. Now prints a red-blue heatmap when a correlation matrix is supplied, or a light-dark blue heatmap when a covariance matrix is supplied.
+
+* Updated `qq_plot` and `plot_hist` to handle a matrix as input through the `df` argument (converts to a data frame internally).
+
+* Added new function `group_cor_mat` for simulating structured correlation matrices with multiple groups and reduced rank. 
+
 
 

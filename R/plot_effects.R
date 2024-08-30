@@ -196,20 +196,19 @@ plot_effects <- function(df,
 #' @examples
 #' # Display a random correlation matrix.
 #'
-#' corA <- rand_cor_mat(
+#' cor_mat <- rand_cor_mat(
 #'   n = 10,
 #'   min.cor = -1,
 #'   max.cor = 1
 #' )
 #'
 #' # Define groups.
-#'
 #' group_df <- data.frame(variable = 1:10, group = c(1, 1, 1, 1, 2, 2, 2, 3, 3, 4))
 #'
 #' plot_matrix(
-#'   mat = corA,
-#'   order = TRUE,
+#'   mat = cor_mat,
 #'   group.df = group_df,
+#'   order = TRUE,
 #'   labels = TRUE
 #' )
 #'
@@ -234,9 +233,13 @@ plot_matrix <- function(mat,
   groups <- FALSE
   ngroups <- 1
   if (!is.null(group.df)) {
+    if (is.vector(group.df) && length(group.df) > 1) {
+      group.df <- data.frame(variable = 1:n, group = group.df)
+    }
     if (!is.data.frame(group.df)) stop("'group.df' must be a data frame")
-    if (ncol(group.df) < 2) stop("'group.df' must be a data frame with at least two columns")
+    if (ncol(group.df) < 2) stop("'group.df' must be a data frame with columns containing the variable names followed by the group numbers")
     colnames(group.df)[1:2] <- c("variable", "group")
+    if (any(is.na(group.df[, 1:2]))) stop("'group.df' must not contain missing values")
     if (any(!colnames(mat) %in% group.df$variable)) stop("'group.df' must contain all variables in 'mat'")
 
     group.df$variable <- factor(as.numeric(as.character(group.df$variable)))
@@ -260,7 +263,7 @@ plot_matrix <- function(mat,
   effect <- "Correlation matrix"
   effect_short <- "cor"
   effect_short2 <- "Cor."
-  if (any(diag(mat) != 1)) {
+  if (any(diag(mat) != 1) | max(mat) > 1) {
     is_cor_mat <- FALSE
     effect <- "Covariance matrix"
     effect_short <- "cov"
@@ -304,19 +307,18 @@ plot_matrix <- function(mat,
 
   var1 <- var2 <- NULL
   if (is_cor_mat) {
-    mid_pt <- 0
-    max_pt <- 1.1
+    colour_limits <- c(-1.1, 1.1)
+    hm.palette <- grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")), space = "Lab")
+    colour_palette <- hm.palette(100)[c(1:45, 50:100)]
+    gg_fill <- ggplot2::scale_fill_gradientn(colours = colour_palette, na.value = "transparent", limits = colour_limits)
   } else {
-    mid_pt <- mean(df[[effect_short]], na.rm = TRUE)
-    max_pt <- max(abs(c(mid_pt - min(df[[effect_short]], na.rm = TRUE), max(df[[effect_short]], na.rm = TRUE) - mid_pt)), na.rm = TRUE) + 1e-8
+    colour_limits <- c(min(df[[effect_short]], na.rm = TRUE) - 0.001, max(df[[effect_short]], na.rm = TRUE) + 0.001)
+    gg_fill <- ggplot2::scale_fill_gradient(low = "#56B1F7", high = "#132B43", na.value = "transparent", limits = colour_limits)
   }
 
   p <- ggplot2::ggplot(data = df, ggplot2::aes(x = var1, y = var2)) +
     ggplot2::geom_tile(ggplot2::aes(fill = get(effect_short))) +
-    ggplot2::scale_fill_gradient2(
-      low = "#195696", mid = "#fcfce1", high = "#A51122", na.value = "transparent",
-      midpoint = mid_pt, limits = c(mid_pt - max_pt, mid_pt + max_pt)
-    ) +
+    gg_fill +
     ggplot2::scale_x_discrete(expand = c(0.0001, 0.0001)) +
     ggplot2::scale_y_discrete(limits = rev, expand = c(0.0001, 0.0001)) +
     ggplot2::xlab("Variable") +
@@ -332,19 +334,22 @@ plot_matrix <- function(mat,
       panel.background = ggplot2::element_blank(),
       plot.title = ggplot2::element_text(margin = ggplot2::margin(t = 4, r = 0, b = 6, l = 0), size = 12, colour = "gray40")
     ) +
-    ggplot2::geom_rect(
-      ggplot2::aes(
-        xmin = rep(seq(0.5, n - 0.5, 1), each = n), xmax = rep(seq(1.5, n + 0.5, 1), each = n),
-        ymin = rep(seq(0.5, n - 0.5, 1), n), ymax = rep(seq(1.5, n + 0.5, 1), n)
-      ),
-      fill = "transparent", colour = "black", linewidth = 0.05, inherit.aes = FALSE
-    ) +
     ggplot2::annotate(
       geom = "rect", xmin = 0.5, ymin = 0.5,
       xmax = n + 0.5, ymax = n + 0.5,
       fill = "transparent", col = "black", lwd = 1.6
     )
 
+  if (n <= 10) {
+    p <- p +
+      ggplot2::geom_rect(
+        ggplot2::aes(
+          xmin = rep(seq(0.5, n - 0.5, 1), each = n), xmax = rep(seq(1.5, n + 0.5, 1), each = n),
+          ymin = rep(seq(0.5, n - 0.5, 1), n), ymax = rep(seq(1.5, n + 0.5, 1), n)
+        ),
+        fill = "transparent", colour = "black", linewidth = 0.05, inherit.aes = FALSE
+      )
+  }
   if (labels) {
     p <- p + ggplot2::theme(
       axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = 8, r = 0, b = 0, l = 0)),
@@ -379,8 +384,8 @@ plot_matrix <- function(mat,
 #'
 #' Creates a normal quantile-quantile (Q-Q) plot for a set of effects (e.g., phenotypes, genetic values, or plot errors).
 #'
-#' @param df A data frame with the effects to be plotted.
-#' @param effect The name of the effects to be plotted.
+#' @param df A data frame or vector with the effects to be plotted.
+#' @param effect The name of the effects to be plotted. Ignored when 'df' is a vector.
 #' @param labels When \code{TRUE} (default is \code{FALSE}), column and row labels are displayed.
 #'   This requires additional columns 'col' and 'row' in the data frame.
 #'
@@ -404,16 +409,17 @@ plot_matrix <- function(mat,
 #'
 #' # Extract the data frame with the theoretical and sample quantiles of the
 #' # user-defined effects.
-#'
 #' qq_df <- qq$data
 #'
 #' @export
 qq_plot <- function(df,
                     effect,
                     labels = FALSE) {
-  if (is.vector(df)) {
-    df <- data.frame(effect = c(df))
-    effect <- "effect"
+  print_title <- TRUE
+  if (is.vector(df) | is.matrix(df)) {
+    df <- data.frame(Effect = c(df))
+    effect <- "Effect"
+    print_title <- FALSE
   }
   if (!is.data.frame(df)) {
     stop("'df' must be a data frame")
@@ -423,6 +429,7 @@ qq_plot <- function(df,
   if (!(effect %in% colnames(df))) {
     stop("'df' must contain the effect to be plotted")
   }
+  if (any(is.na(df[[effect]]))) stop("'df' must not contain missing values")
 
   if (!labels) {
     qq_df <- data.frame(effect = df[[effect]])
@@ -439,7 +446,6 @@ qq_plot <- function(df,
       ggplot2::stat_qq_line(data = qq_df, ggplot2::aes(sample = sample), colour = "steelblue", linewidth = 0.75, inherit.aes = F) +
       ggplot2::geom_point(size = 2) +
       ggplot2::labs(y = "Sample quantiles", x = "Theoretical quantiles") +
-      ggplot2::ggtitle(label = effect) +
       ggplot2::theme(
         plot.title = ggplot2::element_text(margin = ggplot2::margin(t = 4, r = 0, b = 6, l = 0), size = 12, colour = "gray40"),
         axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = 6, r = 0, b = 0, l = 0), size = 11),
@@ -447,6 +453,9 @@ qq_plot <- function(df,
         axis.text = ggplot2::element_text(size = 10)
       ) +
       ggplot2::lims(x = c(mid_pt_x - max_pt_x, mid_pt_x + max_pt_x))
+    if (print_title) {
+      p <- p + ggplot2::ggtitle(label = effect)
+    }
     return(p)
   }
 
@@ -484,7 +493,6 @@ qq_plot <- function(df,
         y = "Sample quantiles", x = "Theoretical quantiles",
         subtitle = "Effects indexed as col:row"
       ) +
-      ggplot2::ggtitle(label = effect) +
       ggplot2::theme(
         plot.title = ggplot2::element_text(margin = ggplot2::margin(t = 4, r = 0, b = 6, l = 0), size = 12, colour = "gray40"),
         plot.subtitle = ggplot2::element_text(size = 10, colour = "gray40"),
@@ -493,8 +501,81 @@ qq_plot <- function(df,
         axis.text = ggplot2::element_text(size = 10)
       ) +
       ggplot2::lims(x = c(mid_pt_x - max_pt_x, mid_pt_x + max_pt_x))
+    if (print_title) {
+      p <- p + ggplot2::ggtitle(label = effect)
+    }
     return(p)
   }
+}
+
+#' Histogram of values
+#'
+#' Creates a histogram of user-defined values (e.g., effects, correlations, or covariances).
+#'
+#' @param df A data frame or vector with the values to be plotted.
+#' @param value The name of the values to be plotted. Ignored when 'df' is a vector.
+#' @param bins Argument passed to \code{ggplot2} (default is \code{30}). Controls the number
+#'   of bins in the histogram.
+#' @param density When \code{TRUE} (default is \code{FALSE}), a density curve is superimposed
+#'   onto the histogram.
+#'
+#' @return A histogram with x- and y-axes displaying the values and their frequency, respectively.
+#'   When \code{density = TRUE}, a density curve is superimposed onto the histogram.
+#'
+#' @examples
+#' # Histogram of the simulated plot errors in the example data frame 'error_df_bivar'
+#' # for Trait 1 in Environment 1.
+#' error_df <- error_df_bivar[error_df_bivar$env == 1, ]
+#' plot_hist(
+#'   df = error_df,
+#'   value = "e.Trait1",
+#'   density = TRUE
+#' )
+#'
+#' @export
+plot_hist <- function(df,
+                      value = NULL,
+                      bins = 30,
+                      density = FALSE) {
+  print_title <- TRUE
+  if (is.vector(df) | is.matrix(df)) {
+    df <- data.frame(Value = c(df))
+    value <- "Value"
+    print_title <- FALSE
+  }
+  if (!is.data.frame(df)) {
+    stop("'df' must be a data frame")
+  }
+  if (!(value %in% colnames(df))) {
+    stop("'df' must contain the value to be plotted")
+  }
+  if (!is.logical(density)) stop("'density' must be logical")
+  if (!(is.atomic(bins) && length(bins) == 1L)) stop("'bins' must be a scalar")
+  if (bins < 1 || bins %% 1 != 0) stop("'bins' must be a positive integer")
+
+  mean_value <- mean(df[[value]], na.rm = TRUE)
+  sd_value <- stats::sd(df[[value]], na.rm = TRUE)
+  count <- NULL
+  p <- ggplot2::ggplot(data = df, ggplot2::aes(x = get(value))) +
+    ggplot2::geom_histogram(color = "black", alpha = 0.3, position = "identity", bins = bins) +
+    ggplot2::geom_vline(data = df, ggplot2::aes(xintercept = mean_value), colour = "steelblue", linewidth = 0.75) +
+    ggplot2::labs(y = "Frequency", x = "Value") +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(margin = ggplot2::margin(t = 4, r = 0, b = 6, l = 0), size = 12, colour = "gray40"),
+      axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = 6, r = 0, b = 0, l = 0), size = 11),
+      axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 4, b = 0, l = 0), size = 11),
+      axis.text = ggplot2::element_text(size = 10)
+    )
+  if (print_title) {
+    p <- p + ggplot2::ggtitle(label = value)
+  }
+  if (density) {
+    if (bins < 2) stop("'bins' must be > 1 to print density curve")
+    bin_width <- (max(df[[value]], na.rm = TRUE) - min(df[[value]], na.rm = TRUE)) / (bins - 1)
+    n <- length(df[[value]][!is.na(df[[value]])])
+    p <- p + ggplot2::geom_density(ggplot2::aes(y = ggplot2::after_stat(count) * bin_width), fill = "transparent", linewidth = 1)
+  }
+  return(p)
 }
 
 #' Sample variogram
@@ -525,12 +606,10 @@ qq_plot <- function(df,
 #' )
 #'
 #' # Sample variogram
-#'
 #' variogram
 #'
 #' # Extract the data frame with the column and row displacements, and the
 #' # average semivariances.
-#'
 #' variogram_df <- variogram$data
 #'
 #' @export
@@ -545,6 +624,7 @@ sample_variogram <- function(df,
   if (any(!c("col", "row", effect) %in% colnames(df))) {
     stop("'df' must contain the columns 'col' and 'row', and the effect to be plotted")
   }
+  if (any(is.na(df[[effect]]))) stop("'df' must not contain missing values")
 
   variogram_df <- data.frame(
     col = df[["col"]],
@@ -619,12 +699,10 @@ sample_variogram <- function(df,
 #' )
 #'
 #' # Theoretical variogram
-#'
 #' variogram
 #'
 #' # Extract the data frame with the column and row displacements, and the
 #' # theoretical semivariances.
-#'
 #' variogram_df <- variogram$data
 #'
 #' @export
